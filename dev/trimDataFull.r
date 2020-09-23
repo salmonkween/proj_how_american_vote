@@ -59,7 +59,7 @@ data1<- dataFull %>% select(  "VCF0004", # year
                              )
 
 # export to file
-write.csv(data1, "data/anes_trimmed.csv", row.names = TRUE)
+write.csv(data1, "output/anes_trimmed.csv", row.names = TRUE)
 
 
 

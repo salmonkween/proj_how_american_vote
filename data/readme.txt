@@ -1,3 +1,7 @@
+Notes: Since the data file is too heavy, github did not accept the push request. 
+You can find a complete raw data through this link:
+
+
 1) Files contained in ANES Timeseries Cumulative Data File
    release file "anes_timeseries_cdf.zip" are the following:
 
