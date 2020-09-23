@@ -3,8 +3,8 @@ title: 'A glimpse into the education levels: Democrats vs Republicans'
 author: "WendyD"
 date: "9/21/2020"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -31,9 +31,9 @@ opts_knit$set(root.dir=normalizePath("../"))
 
 # Introduction
 
-This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, .....(ADD ON LATER)
+This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, the voters feelings toward immigration for each different education groups. I also had a special interest in looking at the voting trend in 2016. 
 
-The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subseted the data by variables of interest, and saved it as data1
+The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subsetted the data by variables of interest, and saved it as data1
 
 # What make a person choose one party over the other?
 
