@@ -3,8 +3,8 @@ title: 'A glimpse into the education levels: Democrats vs Republicans'
 author: "WendyD"
 date: "9/21/2020"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -35,22 +35,14 @@ This report, hopefully, will help you understand what make up the majority of De
 
 The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subsetted the data by variables of interest, and saved it as data1
 
-# What make a person choose one party over the other?
-
-Since the day I came to the US, I have always been intrigued about the US democracy system. Coming from a Communist country, where the Vietnam Communist Party is the sole governing political party, I found the rivalry between the Democratic and Republican parties very interesting. With so many options, I have always wondering: What make a person choose one party over another? 
-
-I looked into their answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made a word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
-
-
-From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management skills. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
 
 # Republican vs Democratics: which party has a "smarter" voting base?
 
-Graduated from a liberal art college in dominantly blue state, Minnesota, I have always believe that people who support Democratics are smarter, more educated, hence the liberal points of views, in comparison to Republican supporters. At least, that is what my American classmates told me. I wonder if that is true. 
+Graduated from a liberal art college in dominantly blue state, Minnesota, I have always believe that people who support Democratic party are smarter, more educated, hence the liberal points of views, in comparison to Republican supporters. At least, that is what my American classmates told me. I wonder if that is true. 
 
 To answer this question, I take a look at the education distribution of the voters versus political identification. I started with 2016, which to many people, had the most unexpected election outcomes. 
 
-```{r}
+```{r, echo =FALSE}
 data1 <- read.csv("output/anes_edu.csv", header=TRUE)
 ```
 
@@ -160,11 +152,11 @@ ggplot(dataBox, aes(x=eduID, y=spread))+
 This boxplot indicates two things:
 
 - People with high school degree or lower tend to vote for democrats more. On the other hands, Republicans have a stronger base in higher educational groups (college degree or higher). 
--  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This means that there was a shift in political preference among the higher educational groups in 2016, as more people with college degree vote for democrats more than for republicans.  
+-  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This means that there was a shift in political preference among the higher educational groups in 2016, as more people with college degree vote for democrats than for republicans.  
 
-# Keywords about each party
+# What make a person choose one party over the other?
 
-I tried to reason the political preference for each different educational background by looking at voter answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made a word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
+I tried to reason the political preference for each different educational background by looking at voter answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
 
 ```{r, echo=FALSE}
 data1<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
@@ -267,7 +259,7 @@ wordcloud(words=wc2$LikeID, freq = wc2$n, scale=c(2,.5), random.order = FALSE,ro
 
 Democratic party win voters favor with their Group Connection quality, and their Domestic Policies. Voters, on the other hand, resonance with Republican Party on their Domestic Policy, Philosophy, Management skills. 
 
-We repeat the same process to answer the question: what characteristics in each parties that make voters hate: 
+We repeat the same process to answer the question: what does voters hate about each parties: 
 
 
 ```{r, echo=FALSE}
@@ -388,13 +380,13 @@ wordcloud(words=cd$DislikeID, freq = cd$n, scale=c(2,.5), random.order = FALSE,r
 
 ```
 
-From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management skills. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
+From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management ability. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
 
-Connecting this to our previous finding, that higher educated voters prefer republicans, the word cloud plots make total sense. People who have lower income , correlated with less educated background. These people choose Democrats because the party offer a superior group connection quality, with a promise of equal pay, higher tax on the rich, and most importantly, inclusivity for the poor. The voters who have higher education, enjoyed a higher pay positions, want to maintain their social status, so they resonance more with the Republican's conservative philosophy. These voters place an emphasis on the party's management skill in preserving the rich's benefits. 
+Connecting this to our previous finding, that higher educated voters prefer republicans, the word cloud plots make total sense. People who have lower income , correlated with less educated background. These people choose Democrats because the party offer a superior group connection quality, with a promise of equal pay, higher tax on the rich, and most importantly, inclusivity for the poor. The voters who have higher education, enjoyed a higher pay positions, want to maintain their social status, so they resonate more with the Republican's conservative philosophy. These voters place an emphasis on the party's management skill in preserving the rich's benefits. 
 
 # Why Donald Trump win? Does his agenda make sense?
 
-I looked at the voter's feeling thermoemter toward Democratic party across the years, and 2016 specifically: 
+I looked at the voter's feeling thermometer toward Democratic party across the years, and 2016 specifically: 
 
 ```{r,echo=FALSE}
 dataFull<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
