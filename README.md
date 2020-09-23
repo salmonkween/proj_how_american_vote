@@ -5,11 +5,10 @@
 <img src="figs/title1.jpeg" width="500">
 
 ### [Project Description](doc/)
-This is the first and only *individual* (as opposed to *team*) this semester. 
 
 Term: Fall 2020
 
-+ Projec title: A glimpse into the education levels: Democrats vs Republicans
++ Project title: A glimpse into the education levels: Democrats vs Republicans
 + This project is conducted by Wendy Doan
 
 + Project summary: This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, the voters feelings toward immigration for each different education groups. I also took a closer look into voting trend in 2016, and came up with logical explainations for Trump's aggresive immigration agenda. 
