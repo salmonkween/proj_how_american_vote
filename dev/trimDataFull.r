@@ -10,6 +10,7 @@ dataFull <- read.table("data/anes_timeseries_cdf_rawdata.txt",
 data1<- dataFull %>% select(  "VCF0004", # year
                                      "VCF0201", # 0201 - 0253: thermometer
                                      "VCF0202",
+                                     "VCF0110",    #education 
                                      "VCF0206",
                                      "VCF0207",
                                      "VCF0211",
@@ -55,7 +56,9 @@ data1<- dataFull %>% select(  "VCF0004", # year
                                      "VCF0394b",
                                      "VCF0395b",
                                      "VCF0396b",
-                                     "VCF0397b"
+                                     "VCF0397b",
+                                     "VCF0426", 
+                                     "VCF9223"    #How likely immigrant steal job
                              )
 
 # export to file

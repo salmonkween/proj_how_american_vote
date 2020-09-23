@@ -1,0 +1,536 @@
+---
+title: 'A glimpse into the education levels: Democrats vs Republicans'
+author: "WendyD"
+date: "9/21/2020"
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, results="hide", message=FALSE}
+library(tibble)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(RColorBrewer)
+library(gridExtra)
+library(data.table)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(grid)
+```
+
+```{r setup, echo=FALSE}
+library(knitr)
+opts_knit$set(root.dir=normalizePath("../"))
+```
+
+# Introduction
+
+This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, .....(ADD ON LATER)
+
+The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subseted the data by variables of interest, and saved it as data1
+
+# What make a person choose one party over the other?
+
+Since the day I came to the US, I have always been intrigued about the US democracy system. Coming from a Communist country, where the Vietnam Communist Party is the sole governing political party, I found the rivalry between the Democratic and Republican parties very interesting. With so many options, I have always wondering: What make a person choose one party over another? 
+
+I looked into their answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made a word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
+
+
+From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management skills. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
+
+# Republican vs Democratics: which party has a "smarter" voting base?
+
+Graduated from a liberal art college in dominantly blue state, Minnesota, I have always believe that people who support Democratics are smarter, more educated, hence the liberal points of views, in comparison to Republican supporters. At least, that is what my American classmates told me. I wonder if that is true. 
+
+To answer this question, I take a look at the education distribution of the voters versus political identification. I started with 2016, which to many people, had the most unexpected election outcomes. 
+
+```{r}
+data1 <- read.csv("output/anes_edu.csv", header=TRUE)
+```
+
+
+```{r, echo=FALSE}
+data2 <- data1[ data1$year == 2016,  ]
+a<- t((data2[data2$partyID == 1,] %>% count(eduID)*100/sum(data2$partyID == 1))[2])
+b<- t((data2[data2$partyID == 3,] %>% count(eduID)*100/sum(data2$partyID == 3))[2])
+edubyparty<-rbind(a,b)
+edubyparty<-as.data.frame(edubyparty)
+names(edubyparty)<- c("Grade School", "High School", "Some Colleges", "College or higher")
+rownames(edubyparty)<-c("Democratics", "Republican")
+print(edubyparty)
+```
+
+It seems like so far in 2016, people who have college degrees and higher tend to identify themselves as democrat, though the ratio is not much higher.
+
+Let us look at the data across the year, to see if this phenomenon still apply over time
+
+```{r, echo=FALSE}
+# histogram time series to plot
+frequency <- data1 %>% count(year, eduID, partyID)
+
+# add new col number of people per party, rescale to fit frequency
+partySum <- (data1 %>% count(year, partyID))
+partySum.expanded <- partySum[ rep(row.names(partySum), each=4) , 2:3 ]
+
+# sort by frequency file by partyID
+frequency <- frequency[ order(frequency$year, frequency$partyID) , ]
+
+# then add new column of partySum
+frequency[, 5] <- partySum.expanded[, 2]                        
+
+# add new col of percentage
+frequency[, 6] <- frequency[, 4] / frequency[, 5] * 100
+
+# change labels
+names(frequency) <- c("year", "eduID", "partyID", 
+                      "count", "partySum", "percentage" )
+
+# change eduID labels
+eduLabel <- data.frame( 
+    ID = c(1,2,3,4), 
+    level = c("1 Grade School", "2 Highschool", "3 Some College", "4 College")
+)
+
+frequency$eduID <- eduLabel$level[ match(frequency$eduID, eduLabel$ID) ]
+
+# graph
+ggplot( 
+    data=frequency, 
+    aes(
+        x=year, 
+        y=percentage, 
+        colour=as.factor(partyID)
+        )
+) + 
+geom_point() + 
+geom_line() +
+facet_wrap(frequency$eduID ~ .) + 
+scale_color_manual(
+    name="Party Identification",
+    labels=c("Dem", "Ind", "Rep"),
+    values=c("blue","brown","red")
+) +
+scale_x_continuous( limits=c(1948,2020) )
+```
+
+Contrary to my beliefs, 2016 is an anomaly.It seems that across the years, Democrats voter base fall mostly into the two categories: (`Grade school` and `High School`), while a Republican voters will more likely fall into the other two groups (`Some colleges` and `College or higher`).
+
+Across the years, there has been a decline in voters without a college degree. College-educated voters, on the other hand, have increased, according to the analysis. There have been more and more people went to get higher degrees, thus introducing an upward trends in some college and colleges education groups on the graph. 
+
+This realization came to me as a total surprise. The stereotype I learned in college, saying that Republicans voters are less educated than Democrats is wrong.  To render my analysis more quantitative, I look at percentage difference between the Democrats and Republicans for each of the educational groups
+
+```{r, echo=FALSE}
+
+# count by eduID only
+dataBox <- (data1 %>% count(year, eduID))
+# Make two new columns of total Dem and Rep
+dataBox[, 4] <- (data1[ data1$partyID == 1, ] %>% count(year, eduID))$n
+dataBox[, 5] <- (data1[ data1$partyID == 3, ] %>% count(year, eduID))$n
+# input total number of dem and rep
+foo5 <- (data1 %>% count(year, partyID))$n
+foo6 <- as.data.frame(t(matrix(foo5, nrow=3, ncol=length(foo5)/3)))
+foo6.expanded <- foo6[ rep(row.names(foo6), each=4) , c(1,3) ]
+dataBox[, 6:7] <- foo6.expanded
+# probability
+dataBox[, 8] <- dataBox[, 4] / dataBox[, 6] * 100
+dataBox[, 9] <- dataBox[, 5] / dataBox[, 7] * 100
+# probability difference
+dataBox[, 10] <- dataBox[, 8] - dataBox[, 9]
+
+
+names(dataBox) <- c("year", "eduID", "tot", "dem", "rep",
+                 "demTot", "repTot", "P(dem)", "P(rep)", "spread")
+
+# plot
+dataBox$eduID <- as.factor(dataBox$eduID)
+ggplot(dataBox, aes(x=eduID, y=spread))+
+        xlab("Education groups")+
+        ylab("Percentage")+
+        geom_boxplot(aes(factor(eduID), spread))+
+        scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"))
+
+```
+
+This boxplot indicates two things:
+
+- People with high school degree or lower tend to vote for democrats more. On the other hands, Republicans have a stronger base in higher educational groups (college degree or higher). 
+-  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This means that there was a shift in political preference among the higher educational groups in 2016, as more people with college degree vote for democrats more than for republicans.  
+
+# Keywords about each party
+
+I tried to reason the political preference for each different educational background by looking at voter answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made a word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
+
+```{r, echo=FALSE}
+data1<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
+```
+
+
+```{r, echo=FALSE}
+likedem<-data1$VCF0375b
+likedem2<-data1$VCF0376b
+likedem3<-data1$VCF0377b
+likedem4<- data1$VCF0378b
+likedem5<- data1$VCF0379b
+
+likedem<-as.data.frame(likedem)
+colnames(likedem)<-"LikeID"
+
+likedem2<-as.data.frame(likedem2)
+names(likedem2)<-"LikeID"
+
+likedem3<-as.data.frame(likedem3)
+names(likedem3)<-"LikeID"
+
+likedem4<-as.data.frame(likedem4)
+names(likedem4)<-"LikeID"
+
+likedem5<-as.data.frame(likedem5)
+names(likedem5)<-"LikeID"
+
+likedem_total<-rbind(likedem,likedem2,likedem3, likedem4, likedem5)
+likedem_total<-likedem_total[!is.na(likedem_total)]
+likedem_total<-as.data.frame(likedem_total)
+names(likedem_total)<- "LikeID"
+
+#create data frame used for label
+like_label <- data.frame(
+        ID = c(11, 12,21,22,23,24,31,32,33,34,35,40,50), 
+        Reason = c("PeopleinParty", 
+                   "PartyCharacter", 
+                   "Candidate Ability", 
+                   "Leadership Qualities",
+                   "Candidate Personal Qualities", 
+                   "Party Connection", 
+                   "Management", 
+                   "Philosophy", 
+                   "DomesticPolicy", 
+                   "F-Policies",
+                   "GroupConnect", 
+                   "Etc",
+                   "Events Unique to One campaign"
+        )
+)
+
+### Match label with the LikeID
+likedem_total$LikeID <- like_label$Reason[match(likedem_total$LikeID, like_label$ID)]
+
+### CREATE WORD CLOUD PLOT
+
+text3<-likedem_total$LikeID
+wc <- count(likedem_total, LikeID)
+wordcloud(words=wc$LikeID, freq = wc$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+```
+
+```{r,echo=FALSE}
+likerep<-data1$VCF0387b
+likerep2<-data1$VCF0388b
+likerep3<-data1$VCF0389b
+likerep4<- data1$VCF0390b
+likerep5<- data1$VCF0391b
+
+likerep<-as.data.frame(likerep)
+names(likerep)<-"LikeID"
+
+likerep2<-as.data.frame(likerep2)
+names(likerep2)<-"LikeID"
+
+likerep3<-as.data.frame(likerep3)
+names(likerep3)<-"LikeID"
+
+likerep4<-as.data.frame(likerep4)
+names(likerep4)<-"LikeID"
+
+likerep5<-as.data.frame(likerep5)
+names(likerep5)<-"LikeID"
+
+likerep_total<-rbind(likerep,likerep2, likerep3, likerep4, likerep5)   
+likerep_total<-likerep_total[!is.na(likerep_total)]
+likerep_total<-as.data.frame(likerep_total)
+names(likerep_total)<- "LikeID"
+
+likerep_total$LikeID <- like_label$Reason[match(likerep_total$LikeID, like_label$ID)]
+
+## Plotting
+text4<-likerep_total$LikeID
+wc2 <- count(likerep_total, LikeID)
+wordcloud(words=wc2$LikeID, freq = wc2$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+Democratic party win voters favor with their Group Connection quality, and their Domestic Policies. Voters, on the other hand, resonance with Republican Party on their Domestic Policy, Philosophy, Management skills. 
+
+We repeat the same process to answer the question: what characteristics in each parties that make voters hate: 
+
+
+```{r, echo=FALSE}
+# ATTEMPT DISLIKE about DEMOCRATIC PARTY
+dislikedem<-data1$VCF0381b
+dislikedem<-dislikedem[!is.na(dislikedem)]
+dislikedem<-as.data.frame(dislikedem)
+names(dislikedem)<-"DislikeID"
+
+#VCF0382
+dislikedem3<-data1$VCF0382b
+dislikedem3<-dislikedem3[!is.na(dislikedem3)]
+dislikedem3<-as.data.frame(dislikedem3)
+names(dislikedem3)<-"DislikeID"
+
+## VCF0383
+dislikedem6<-data1$VCF0383b
+dislikedem6<-dislikedem6[!is.na(dislikedem6)]
+dislikedem6<-as.data.frame(dislikedem6)
+names(dislikedem6)<-"DislikeID"
+
+## VCF0384
+dislikedem5<-data1$VCF0384b
+dislikedem5<-dislikedem5[!is.na(dislikedem5)]
+dislikedem5<-as.data.frame(dislikedem5)
+names(dislikedem5)<-"DislikeID"
+
+# rbind and make new data frame
+dislikedem_total<-rbind(dislikedem, dislikedem3, dislikedem6, dislikedem5)
+
+# match the dislikeID with answer key
+dislike_label1 <- data.frame(
+        ID = c(11, 12,21,22,23,24,31,32,33,34,35,40,50), 
+        Reason = c("PeopleinParty", 
+                 "PartyCharacter", 
+                 "Candidate Ability", 
+                 "Leadership Qualities",
+                 "Candidate Personal Qualities", 
+                 "Party Connection", 
+                 "Management", 
+                 "Philosophy", 
+                 "DomesticPolicy", 
+                 "F-Policies",
+                 "GroupConnect", 
+                 "Etc",
+                 "Events Unique to One campaign"
+                 )
+        )
+
+dislike_label2 <- data.frame(
+        ID= c(1,2,3,4,5,6,7,8,9,10), 
+        Reason= c("PeopleinParty",
+                  "Management", 
+                  "Philosophy", 
+                  "DomesticPolicy", 
+                  "DomesticPolicy", 
+                  "ForeignPolicy", 
+                  "Bad for groups of interest", 
+                  "Good for group of interest", 
+                  "Party Attitude",
+                  "Others"
+                  )
+        )
+dislike_label<-rbind(dislike_label1, dislike_label2)
+
+#match label with factor in main data frame
+dislikedem_total$DislikeID <- dislike_label$Reason[
+        match( dislikedem_total$DislikeID, dislike_label$ID )
+        ]
+
+####### CREATE WORD CLOUD PLOT
+
+text<-dislikedem_total$DislikeID
+cd2 <- count(dislikedem_total, DislikeID)
+wordcloud(words=cd2$DislikeID, freq = cd2$n,scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+```{r, echo=FALSE}
+dislikerep<-data1$VCF0393b
+dislikerep2<-data1$VCF0394b
+dislikerep4<- data1$VCF0395b
+dislikerep5<- data1$VCF0396b
+dislikerep6<- data1$VCF0397b
+
+# create dataframe and rename column
+dislikerep<-as.data.frame(dislikerep)
+names(dislikerep)<-"DislikeID"
+
+dislikerep2<-as.data.frame(dislikerep2)
+names(dislikerep2)<-"DislikeID"
+
+dislikerep4<-as.data.frame(dislikerep4)
+names(dislikerep4)<-"DislikeID"
+
+dislikerep5<-as.data.frame(dislikerep5)
+names(dislikerep5)<-"DislikeID"
+
+dislikerep6<-as.data.frame(dislikerep6)
+names(dislikerep6)<-"DislikeID"
+
+dislikerep_total<-rbind(dislikerep, dislikerep2,dislikerep4,dislikerep5,dislikerep6)
+dislikerep_total<-dislikerep_total[!is.na(dislikerep_total)]
+dislikerep_total<-as.data.frame(dislikerep_total)
+names(dislikerep_total)<- "DislikeID"
+
+
+### Match label with the dislikeID
+dislikerep_total$DislikeID <- dislike_label$Reason[match(dislikerep_total$DislikeID, dislike_label$ID)]
+
+### CREATE WORD CLOUD PLOT
+
+text2<-dislikerep_total$DislikeID
+cd <- count(dislikerep_total, DislikeID)
+wordcloud(words=cd$DislikeID, freq = cd$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management skills. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
+
+Connecting this to our previous finding, that higher educated voters prefer republicans, the word cloud plots make total sense. People who have lower income , correlated with less educated background. These people choose Democrats because the party offer a superior group connection quality, with a promise of equal pay, higher tax on the rich, and most importantly, inclusivity for the poor. The voters who have higher education, enjoyed a higher pay positions, want to maintain their social status, so they resonance more with the Republican's conservative philosophy. These voters place an emphasis on the party's management skill in preserving the rich's benefits. 
+
+# Why Donald Trump win? Does his agenda make sense?
+
+I looked at the voter's feeling thermoemter toward Democratic party across the years, and 2016 specifically: 
+
+```{r,echo=FALSE}
+dataFull<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
+data3 <- as.data.frame( 
+    cbind(dataFull$VCF0004,  dataFull$VCF0218, dataFull$VCF0110)
+)
+
+# clean NA and invalid entries and non valid temperatures
+data3 <- data3[ complete.cases(data3), ]
+data3 <- data3[(data3$V2 != 98) & (data3$V2 != 99), ]
+data3 <- data3[data3$V3 != 0, ]
+
+# 2016 year extract
+data4 <- data3[ data3$V1 == 2016, ]
+
+data3$V3 <- as.factor(data3$V3)
+data4$V3 <- as.factor(data4$V3)
+# all years
+p1 <- ggplot(data3, aes(x=V3, y=V2))+xlab("Education Levels")+ylab("Thermometer level")+
+  geom_boxplot(aes(factor(V3), V2))+
+  ggtitle("Across Years")+
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  
+p2 <- ggplot(data4, aes(x=V3, y=V2))+ xlab("Education Levels")+ylab("Thermometer level")+
+  ggtitle("In 2016")+
+  geom_boxplot(aes(factor(V3), V2))+
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+grid.arrange(p1, p2, ncol=2, top = textGrob(" Feelings toward Democratic Party", gp=gpar(fontsize=20,font=3)))
+
+```
+
+
+```{r,echo=FALSE}
+dataFull<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
+data3 <- as.data.frame( 
+    cbind(dataFull$VCF0004,  dataFull$VCF0224, dataFull$VCF0110)
+)
+
+# clean NA and invalid entries and non valid temperatures
+data3 <- data3[ complete.cases(data3), ]
+data3 <- data3[(data3$V2 != 98) & (data3$V2 != 99), ]
+data3 <- data3[data3$V3 != 0, ]
+
+# 2016 year extract
+data4 <- data3[ data3$V1 == 2016, ]
+
+data3$V3 <- as.factor(data3$V3)
+data4$V3 <- as.factor(data4$V3)
+# all years
+p1 <- ggplot(data3, aes(x=V3, y=V2))+xlab("Education Levels")+ylab("Thermometer level")+
+  geom_boxplot(aes(factor(V3), V2))+
+  ggtitle("Across Years")+
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  
+p2 <- ggplot(data4, aes(x=V3, y=V2))+ xlab("Education Levels")+ylab("Thermometer level")+
+  ggtitle("In 2016")+
+  geom_boxplot(aes(factor(V3), V2))+
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+grid.arrange(p1, p2, ncol=2, top = textGrob(" Feelings toward Republican Party", gp=gpar(fontsize=20,font=3)))
+
+```
+
+It turns out, that, there was a decrease in favoritism against Democratic party across different educations groups, especially within the democratic strongest voting base: grade school and high school voters. On the other hand, people's feeling toward Republican party remains relatively unchanged. This means that somehow in 2016, Donald Trump succeed in attracting  voters from the democratic party into his supporting group. 
+
+I then analyzed one of Trump's most prominent agenda: Blocking Immigration, and tried to explain the shift in voting base toward Republicans.
+
+
+```{r, echo=FALSE}
+###  How likely can immigrants steal your job?
+data5 <- as.data.frame( 
+    cbind(dataFull$VCF0004, dataFull$VCF9223, dataFull$VCF0110)
+)
+data5 <- data5[complete.cases(data5), ]      #only take complete case
+data5 <- data5[(data5$V2 != -8) & (data5$V2 != -9), ]
+data5 <- data5[data5$V3 != 0, ]
+
+frequency2 <- data5 %>% count(V1,V2,V3)
+
+# add new col number of people per feeling toward immigrant, rescale to fit frequency
+immigrantSum <- (data5 %>% count(V1, V2))
+immigrantSum.expanded <- immigrantSum[ rep(row.names(immigrantSum), each=4) , 2:3 ]
+
+# sort by frequency file by partyID
+frequency2 <- frequency2[ order(frequency2$V1, frequency2$V2) , ]
+
+# then add new column of partySum
+frequency2[, 5] <- immigrantSum.expanded[, 2]                        
+
+# add new col of percentage: how many ppl in an education level respond to immigrant level
+frequency2[, 6] <- frequency2[, 4] / frequency2[, 5] * 100
+
+# change labels
+names(frequency2) <- c("year", "ImmigrantID", "EduID", 
+                      "count", "immigrantSum", "percentage" )
+# change eduID labels
+eduLabel2 <- data.frame( 
+    ID = c(1,2,3,4), 
+    level = c("1 Grade School", "2 Highschool", "3 Some College", "4 College")
+)
+
+frequency2$EduID<- eduLabel2$level[ match(frequency2$EduID, eduLabel2$ID) ]
+
+# graph
+ggplot( 
+    data=frequency2, 
+    aes(
+        x=year, 
+        y=percentage, 
+        colour=as.factor(ImmigrantID)
+        )
+)+
+  geom_point()+
+  geom_line() +
+  facet_wrap(frequency2$EduID ~ .)+
+  scale_color_manual(
+    name="Levels of likeliness",
+    labels=c("Extremely likely", "Very likely", "Somewhat likely", "Not likely"),
+    values=c("blue","brown","red", "green"))
+```
+
+
+Most people who only have high school degrees think that the chances immigrants stealing their jobs are extremely likely. These people used to mainly support Democratic party. In ` Some College degrees` educational groups, where republicans lead democratic party, there is an uptrend in voters think negatively about immigrants job wise. 
+
+This conclusion explained Trump's aggressive immigration agenda in 2016, where he publicly said that he would build a wall spanning the entirety of the U.S-Mexico border, ban all Muslims from entering the country, deport millions of undocumented immigrants who have lived in the interior of the United States for years, and increase the salary quota and restrictions on highly skilled worker VISA H1B. 
+
+## Trump's agenda sounds idiotic, ruthless yet extremely effective
+
+Trump purposely used his immigration agenda to target and attract democratic voting base: people who have high school and grade school degrees and who strongly believe immigrants are stealing there jobs. 
+
+# Conclusion
+
+- People who vote for democratic party are mainly high school and grade school degree holders. On the other hand, Republican party a stronger presence in Higher degree holders (some colleges and higher education).
+- Voters commend on Democratics on their group connection quality, domestic policies, while Republicans gain favor through their management skills and also domestic policies.
+- Voters hate Democrats for their poor management skills, and Republicans for their lack of group connections. 
+- People who only have high school degree think that the chances immigrants stealing their jobs are very likely. People have college degrees or higher don't think so (not likely). Although, we observed some upward trend in the number of people with ` some college` degree thinking negatively about immgration levels impact on the job market. 
+
+
+
+

@@ -1,5 +1,5 @@
 Notes: Since the data file is too heavy, github did not accept the push request. 
-You can find a complete raw data through this link:
+You can find a complete raw data through this link: https://electionstudies.org/data-center/
 
 
 1) Files contained in ANES Timeseries Cumulative Data File
