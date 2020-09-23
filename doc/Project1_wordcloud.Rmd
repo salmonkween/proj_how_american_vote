@@ -1,0 +1,269 @@
+---
+title: "Project_1_wordcloud"
+author: "WendyD"
+date: "9/21/2020"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(tibble)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(RColorBrewer)
+library(gridExtra)
+library(data.table)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+```
+
+```{r setup, echo=FALSE}
+library(knitr)
+opts_knit$set(root.dir=normalizePath("../"))
+```
+
+```{r, echo=FALSE}
+getwd()
+```
+# Introduction
+
+This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, .....(ADD ON LATER)
+
+```{r, echo=FALSE}
+
+data1<-read.table("data/anes_trimmed.csv", header = TRUE, sep=",")
+```
+
+The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subseted the data by variables of interest, and saved it as data1
+
+# What make a person choose one party over the other?
+
+Since the day I came to the US, I have always been intrigued about the US democracy system. Coming from a Communist country, where the Vietnam Communist Party is the sole governing political party, I found the rivalry between the Democratic and Republican parties very interesting. With so many options, I have always wondering: What make a person choose one party over another? 
+
+To answer this question, I looked into their answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made a word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
+
+```{r, echo=FALSE}
+# Like Dem Party
+likedem<-data1$VCF0375b
+likedem2<-data1$VCF0376b
+likedem3<-data1$VCF0377b
+likedem4<- data1$VCF0378b
+likedem5<- data1$VCF0379b
+
+likedem<-as.data.frame(likedem)
+names(likedem)<-"LikeID"
+
+likedem2<-as.data.frame(likedem2)
+names(likedem2)<-"LikeID"
+
+likedem3<-as.data.frame(likedem3)
+names(likedem3)<-"LikeID"
+
+likedem4<-as.data.frame(likedem4)
+names(likedem4)<-"LikeID"
+
+likedem5<-as.data.frame(likedem5)
+names(likedem5)<-"LikeID"
+
+likedem_total<-rbind(likedem,likedem2,likedem3, likedem4, likedem5)
+likedem_total<-likedem_total[!is.na(likedem_total)]
+likedem_total<-as.data.frame(likedem_total)
+names(likedem_total)<- "LikeID"
+
+#create data frame used for label
+like_label <- data.frame(
+        ID = c(11, 12,21,22,23,24,31,32,33,34,35,40,50), 
+        Reason = c("PeopleinParty", 
+                   "PartyCharacter", 
+                   "Candidate Ability", 
+                   "Leadership Qualities",
+                   "Candidate Personal Qualities", 
+                   "Party Connection", 
+                   "Management", 
+                   "Philosophy", 
+                   "DomesticPolicy", 
+                   "F-Policies",
+                   "GroupConnect", 
+                   "Etc",
+                   "Events Unique to One campaign"
+        )
+)
+
+### Match label with the LikeID
+likedem_total$LikeID <- like_label$Reason[match(likedem_total$LikeID, like_label$ID)]
+
+### CREATE WORD CLOUD PLOT
+
+text3<-likedem_total$LikeID
+wc <- count(likedem_total, LikeID)
+wordcloud(words=wc$LikeID, freq = wc$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+```
+
+```{r,echo=FALSE}
+likerep<-data1$VCF0387b
+likerep2<-data1$VCF0388b
+likerep3<-data1$VCF0389b
+likerep4<- data1$VCF0390b
+likerep5<- data1$VCF0391b
+
+likerep<-as.data.frame(likerep)
+names(likerep)<-"LikeID"
+
+likerep2<-as.data.frame(likerep2)
+names(likerep2)<-"LikeID"
+
+likerep3<-as.data.frame(likerep3)
+names(likerep3)<-"LikeID"
+
+likerep4<-as.data.frame(likerep4)
+names(likerep4)<-"LikeID"
+
+likerep5<-as.data.frame(likerep5)
+names(likerep5)<-"LikeID"
+
+likerep_total<-rbind(likerep,likerep2, likerep3, likerep4, likerep5)   
+likerep_total<-likerep_total[!is.na(likerep_total)]
+likerep_total<-as.data.frame(likerep_total)
+names(likerep_total)<- "LikeID"
+
+likerep_total$LikeID <- like_label$Reason[match(likerep_total$LikeID, like_label$ID)]
+
+## Plotting
+text4<-likerep_total$LikeID
+wc2 <- count(likerep_total, LikeID)
+wordcloud(words=wc2$LikeID, freq = wc2$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+Democratic party win voters favor with their Group Connection quality, and their Domestic Policies. Voters, on the other hand, resonance with Republican Party on their Domestic Policy, Philosophy, Management skills. 
+
+We repeat the same process to answer the question: what characteristics in each parties that make voters hate: 
+
+
+```{r, echo=FALSE}
+# ATTEMPT DISLIKE about DEMOCRATIC PARTY
+dislikedem<-data1$VCF0381b
+dislikedem<-dislikedem[!is.na(dislikedem)]
+dislikedem<-as.data.frame(dislikedem)
+names(dislikedem)<-"DislikeID"
+
+#VCF0382
+dislikedem3<-data1$VCF0382b
+dislikedem3<-dislikedem3[!is.na(dislikedem3)]
+dislikedem3<-as.data.frame(dislikedem3)
+names(dislikedem3)<-"DislikeID"
+
+## VCF0383
+dislikedem6<-data1$VCF0383b
+dislikedem6<-dislikedem6[!is.na(dislikedem6)]
+dislikedem6<-as.data.frame(dislikedem6)
+names(dislikedem6)<-"DislikeID"
+
+## VCF0384
+dislikedem5<-data1$VCF0384b
+dislikedem5<-dislikedem5[!is.na(dislikedem5)]
+dislikedem5<-as.data.frame(dislikedem5)
+names(dislikedem5)<-"DislikeID"
+
+# rbind and make new data frame
+dislikedem_total<-rbind(dislikedem, dislikedem3, dislikedem6, dislikedem5)
+dim(dislikedem_total)
+
+# match the dislikeID with answer key
+dislike_label1 <- data.frame(
+        ID = c(11, 12,21,22,23,24,31,32,33,34,35,40,50), 
+        Reason = c("PeopleinParty", 
+                 "PartyCharacter", 
+                 "Candidate Ability", 
+                 "Leadership Qualities",
+                 "Candidate Personal Qualities", 
+                 "Party Connection", 
+                 "Management", 
+                 "Philosophy", 
+                 "DomesticPolicy", 
+                 "F-Policies",
+                 "GroupConnect", 
+                 "Etc",
+                 "Events Unique to One campaign"
+                 )
+        )
+
+dislike_label2 <- data.frame(
+        ID= c(1,2,3,4,5,6,7,8,9,10), 
+        Reason= c("PeopleinParty",
+                  "Management", 
+                  "Philosophy", 
+                  "DomesticPolicy", 
+                  "DomesticPolicy", 
+                  "ForeignPolicy", 
+                  "Bad for groups of interest", 
+                  "Good for group of interest", 
+                  "Party Attitude",
+                  "Others"
+                  )
+        )
+dislike_label<-rbind(dislike_label1, dislike_label2)
+
+#match label with factor in main data frame
+dislikedem_total$DislikeID <- dislike_label$Reason[
+        match( dislikedem_total$DislikeID, dislike_label$ID )
+        ]
+
+####### CREATE WORD CLOUD PLOT
+
+text<-dislikedem_total$DislikeID
+cd2 <- count(dislikedem_total, DislikeID)
+wordcloud(words=cd2$DislikeID, freq = cd2$n,scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+```{r, echo=FALSE}
+dislikerep<-data1$VCF0393b
+dislikerep2<-data1$VCF0394b
+dislikerep4<- data1$VCF0395b
+dislikerep5<- data1$VCF0396b
+dislikerep6<- data1$VCF0397b
+
+# create dataframe and rename column
+dislikerep<-as.data.frame(dislikerep)
+names(dislikerep)<-"DislikeID"
+
+dislikerep2<-as.data.frame(dislikerep2)
+names(dislikerep2)<-"DislikeID"
+
+dislikerep4<-as.data.frame(dislikerep4)
+names(dislikerep4)<-"DislikeID"
+
+dislikerep5<-as.data.frame(dislikerep5)
+names(dislikerep5)<-"DislikeID"
+
+dislikerep6<-as.data.frame(dislikerep6)
+names(dislikerep6)<-"DislikeID"
+
+dislikerep_total<-rbind(dislikerep, dislikerep2,dislikerep4,dislikerep5,dislikerep6)
+dislikerep_total<-dislikerep_total[!is.na(dislikerep_total)]
+dislikerep_total<-as.data.frame(dislikerep_total)
+names(dislikerep_total)<- "DislikeID"
+
+
+### Match label with the dislikeID
+dislikerep_total$DislikeID <- dislike_label$Reason[match(dislikerep_total$DislikeID, dislike_label$ID)]
+
+### CREATE WORD CLOUD PLOT
+
+text2<-dislikerep_total$DislikeID
+cd <- count(dislikerep_total, DislikeID)
+wordcloud(words=cd$DislikeID, freq = cd$n, scale=c(2,.5), random.order = FALSE,rot.per=.5)
+
+
+```
+
+From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management skills. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
+
+
+

@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+
+#data file too heavy
+data/anes_timeseries_cdf_rawdata.txt
