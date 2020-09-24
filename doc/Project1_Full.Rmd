@@ -1,5 +1,5 @@
 ---
-title: 'A glimpse into the education levels: Democrats vs Republicans'
+title: 'A glimpse into the voters demographics: Democrats vs Republicans'
 author: "WendyD"
 date: "9/21/2020"
 output:
@@ -29,14 +29,21 @@ library(knitr)
 opts_knit$set(root.dir=normalizePath("../"))
 ```
 
+# A little bit about our data
+
+The goal of this project is to look deeper in to voter's background and voting behaviors. using  the data from the American National Election Studies (ANES). I worked with the cumulative time series data file (1948-2016). The raw data consists of 59944 obs with 1029 variables. I then cleaned and subset the data for the purpose of this project accordingly. The processed data could be found in the output folder. 
+
 # Introduction
 
 This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, the voters feelings toward immigration for each different education groups. I also had a special interest in looking at the voting trend in 2016. 
 
-The data I used for this report comes from American National Election Studies(ANES). The original data has 1029 variables. To make thing easier, I subsetted the data by variables of interest, and saved it as data1
+There are 3 main questions that I want to answer in this project:
+- What are the voter' education levels distribution for each party?
+- Why do one voters like/dislike a particular party?
+- Trump's immigration agenda-does it make sense?
 
 
-# Republican vs Democratics: which party has a "smarter" voting base?
+# Question 1: Republican vs Democratics: which party has a "smarter" voting base?
 
 Graduated from a liberal art college in dominantly blue state, Minnesota, I have always believe that people who support Democratic party are smarter, more educated, hence the liberal points of views, in comparison to Republican supporters. At least, that is what my American classmates told me. I wonder if that is true. 
 
@@ -53,7 +60,7 @@ a<- t((data2[data2$partyID == 1,] %>% count(eduID)*100/sum(data2$partyID == 1))[
 b<- t((data2[data2$partyID == 3,] %>% count(eduID)*100/sum(data2$partyID == 3))[2])
 edubyparty<-rbind(a,b)
 edubyparty<-as.data.frame(edubyparty)
-names(edubyparty)<- c("Grade School", "High School", "Some Colleges", "College or higher")
+names(edubyparty)<- c("Grade School", "High School", "Some Colleges no degree", "College or higher")
 rownames(edubyparty)<-c("Democratics", "Republican")
 print(edubyparty)
 ```
@@ -86,7 +93,7 @@ names(frequency) <- c("year", "eduID", "partyID",
 # change eduID labels
 eduLabel <- data.frame( 
     ID = c(1,2,3,4), 
-    level = c("1 Grade School", "2 Highschool", "3 Some College", "4 College")
+    level = c("1 Grade School", "2 Highschool", "3 Some College no degree", "4 College")
 )
 
 frequency$eduID <- eduLabel$level[ match(frequency$eduID, eduLabel$ID) ]
@@ -145,7 +152,7 @@ ggplot(dataBox, aes(x=eduID, y=spread))+
         xlab("Education groups")+
         ylab("Percentage")+
         geom_boxplot(aes(factor(eduID), spread))+
-        scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"))
+        scale_x_discrete(labels = c("Grade school", "High school", "Some College no degree", "College degree"))
 
 ```
 
@@ -154,7 +161,7 @@ This boxplot indicates two things:
 - People with high school degree or lower tend to vote for democrats more. On the other hands, Republicans have a stronger base in higher educational groups (college degree or higher). 
 -  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This means that there was a shift in political preference among the higher educational groups in 2016, as more people with college degree vote for democrats than for republicans.  
 
-# What make a person choose one party over the other?
+# Question 2: What make a person choose one party over the other?
 
 I tried to reason the political preference for each different educational background by looking at voter answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
 
@@ -384,7 +391,7 @@ From what the word clouds show, it appears the top common reason that make voter
 
 Connecting this to our previous finding, that higher educated voters prefer republicans, the word cloud plots make total sense. People who have lower income , correlated with less educated background. These people choose Democrats because the party offer a superior group connection quality, with a promise of equal pay, higher tax on the rich, and most importantly, inclusivity for the poor. The voters who have higher education, enjoyed a higher pay positions, want to maintain their social status, so they resonate more with the Republican's conservative philosophy. These voters place an emphasis on the party's management skill in preserving the rich's benefits. 
 
-# Why Donald Trump win? Does his agenda make sense?
+# Question 3: Why Donald Trump win? Does his agenda make sense?
 
 I looked at the voter's feeling thermometer toward Democratic party across the years, and 2016 specifically: 
 
@@ -408,12 +415,12 @@ data4$V3 <- as.factor(data4$V3)
 p1 <- ggplot(data3, aes(x=V3, y=V2))+xlab("Education Levels")+ylab("Thermometer level")+
   geom_boxplot(aes(factor(V3), V2))+
   ggtitle("Across Years")+
-  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College no degree", "College degree"), guide=guide_axis(n.dodge = 3)) 
   
 p2 <- ggplot(data4, aes(x=V3, y=V2))+ xlab("Education Levels")+ylab("Thermometer level")+
   ggtitle("In 2016")+
   geom_boxplot(aes(factor(V3), V2))+
-  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College no degree", "College degree"), guide=guide_axis(n.dodge = 3)) 
 grid.arrange(p1, p2, ncol=2, top = textGrob(" Feelings toward Democratic Party", gp=gpar(fontsize=20,font=3)))
 
 ```
@@ -439,12 +446,12 @@ data4$V3 <- as.factor(data4$V3)
 p1 <- ggplot(data3, aes(x=V3, y=V2))+xlab("Education Levels")+ylab("Thermometer level")+
   geom_boxplot(aes(factor(V3), V2))+
   ggtitle("Across Years")+
-  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College no degree", "College degree"), guide=guide_axis(n.dodge = 3)) 
   
 p2 <- ggplot(data4, aes(x=V3, y=V2))+ xlab("Education Levels")+ylab("Thermometer level")+
   ggtitle("In 2016")+
   geom_boxplot(aes(factor(V3), V2))+
-  scale_x_discrete(labels = c("Grade school", "High school", "Some College", "College degree"), guide=guide_axis(n.dodge = 3)) 
+  scale_x_discrete(labels = c("Grade school", "High school", "Some College no degree", "College degree"), guide=guide_axis(n.dodge = 3)) 
 grid.arrange(p1, p2, ncol=2, top = textGrob(" Feelings toward Republican Party", gp=gpar(fontsize=20,font=3)))
 
 ```
@@ -484,7 +491,7 @@ names(frequency2) <- c("year", "ImmigrantID", "EduID",
 # change eduID labels
 eduLabel2 <- data.frame( 
     ID = c(1,2,3,4), 
-    level = c("1 Grade School", "2 Highschool", "3 Some College", "4 College")
+    level = c("1 Grade School", "2 Highschool", "3 Some College no degree", "4 College")
 )
 
 frequency2$EduID<- eduLabel2$level[ match(frequency2$EduID, eduLabel2$ID) ]
@@ -515,6 +522,13 @@ This conclusion explained Trump's aggressive immigration agenda in 2016, where h
 ## Trump's agenda sounds idiotic, ruthless yet extremely effective
 
 Trump purposely used his immigration agenda to target and attract democratic voting base: people who have high school and grade school degrees and who strongly believe immigrants are stealing there jobs. 
+
+# Biases 
+
+This section mentioned some biases that should be taken into consideration when looking at the outcomes of this report, as well as the survey conducted by ANES. First of all, people were paid to do the survey. Hence the data may be biased, and not represent the voter population correctly. Secondly, there are difference in sample sizes across years that the survey took place. There was less data recorded in 1990s, compared to, for example 2010-2016.Hence, reader should take analysis related to the volume of voters with a grain of salt. One way to minimize these biases is to utilize error bars. Another potential biases that we should take into account is the effect of the interview administrator. Readers should take in mind the influence of administrator's body language on respondent's answers. 
+
+For all the potential biases above, in this project, I tried to minimize the biases, by taking the difference between Democrats voters and Republican voters, and average them across the years, instead of taking the absolute respondent volume. 
+
 
 # Conclusion
 
