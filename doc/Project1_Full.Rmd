@@ -3,8 +3,8 @@ title: 'A glimpse into the voters demographics: Democrats vs Republicans'
 author: "WendyD"
 date: "9/21/2020"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -31,23 +31,32 @@ opts_knit$set(root.dir=normalizePath("../"))
 
 # A little bit about our data
 
-The goal of this project is to look deeper in to voter's background and voting behaviors. using  the data from the American National Election Studies (ANES). I worked with the cumulative time series data file (1948-2016). The raw data consists of 59944 obs with 1029 variables. I then cleaned and subset the data for the purpose of this project accordingly. The processed data could be found in the output folder. 
+The goal of this project is to look deeper in to voter background and voting behavior using open-sourced data from the American National Election Studies (ANES). We work with the cumulative time series data, compiled between 1948 - 2016. The raw data consists of 59944 observations with 1029 variables. Only relevant subset was extracted and cleaned from the raw data set. The processed data could be found in the `output` folder. 
 
 # Introduction
 
-This report, hopefully, will help you understand what make up the majority of Democratic and Republican voting base, their preference, what they like about their parties of choice. Some other criteria that this report covers including: education background, the voters feelings toward immigration for each different education groups. I also had a special interest in looking at the voting trend in 2016. 
+This project glimpses into the education level difference between Democrat voters and Republican voters.
 
-There are 3 main questions that I want to answer in this project:
-- What are the voter' education levels distribution for each party?
-- Why do one voters like/dislike a particular party?
-- Trump's immigration agenda-does it make sense?
+Specifically, this report aims to elucidate which education level makes up the majority of each voting group, their preferences, and what they like and dislike about the parties of their choice. To potentially explain their voting choices, we also look at their feeling toward various issues, for instance, immigration.
+
+The project also look closer into the voting trend in 2016. Through this exploratory analysis, we hypothesize that aggressive immigration agenda is a big factor of Trump's success 2016.
+
+There are 3 main questions that we aim to explore in this project:
+
+- What are the voters' education level distribution for each party?
+
+- What does a particular voter likes/dislikes about his/her preferred party?
+
+- How do each education group feel about Trump's immigration agenda?
 
 
 # Question 1: Republican vs Democratics: which party has a "smarter" voting base?
 
-Graduated from a liberal art college in dominantly blue state, Minnesota, I have always believe that people who support Democratic party are smarter, more educated, hence the liberal points of views, in comparison to Republican supporters. At least, that is what my American classmates told me. I wonder if that is true. 
+Graduated from a liberal art college in Minnesota, a historically blue state, we always assumed that people with higher education levels tend to support the Democrat party. After all, Republican party is usually associated with climate change skepticism, evolution deniers, and anti-LGBT policies.  
 
-To answer this question, I take a look at the education distribution of the voters versus political identification. I started with 2016, which to many people, had the most unexpected election outcomes. 
+To answer this question, we look at the education distribution of the voters versus political identification. To illustrate our analysis, we first start with 2016 as an example. 
+
+Since the respondent political distribution does not necessary reflects the true population, percentage distribution is a better indicator compared to counting number of respondents. 
 
 ```{r, echo =FALSE}
 data1 <- read.csv("output/anes_edu.csv", header=TRUE)
@@ -65,9 +74,7 @@ rownames(edubyparty)<-c("Democratics", "Republican")
 print(edubyparty)
 ```
 
-It seems like so far in 2016, people who have college degrees and higher tend to identify themselves as democrat, though the ratio is not much higher.
-
-Let us look at the data across the year, to see if this phenomenon still apply over time
+In 2016, people who have college degrees and higher tend to identify themselves as Democrats, though this difference does not seem significant. Let us look at the data across the year, to see if this phenomenon still applies over time
 
 ```{r, echo=FALSE}
 # histogram time series to plot
@@ -118,11 +125,15 @@ scale_color_manual(
 scale_x_continuous( limits=c(1948,2020) )
 ```
 
-Contrary to my beliefs, 2016 is an anomaly.It seems that across the years, Democrats voter base fall mostly into the two categories: (`Grade school` and `High School`), while a Republican voters will more likely fall into the other two groups (`Some colleges` and `College or higher`).
+The clear trend can be seen across all education levels. Across the years, there has been a decline in voters without a college degree. College-educated voters, on the other hand, have increased, according to the analysis. 
 
-Across the years, there has been a decline in voters without a college degree. College-educated voters, on the other hand, have increased, according to the analysis. There have been more and more people went to get higher degrees, thus introducing an upward trends in some college and colleges education groups on the graph. 
+This could be due to two apparent reasons. There have been more and more people getting higher degrees, thus introducing an upward trends in some college and colleges education groups on the graph. This is due to more and more jobs require at least a college degree, which can be corroborated by looking at studies on job distribution over time. 
 
-This realization came to me as a total surprise. The stereotype I learned in college, saying that Republicans voters are less educated than Democrats is wrong.  To render my analysis more quantitative, I look at percentage difference between the Democrats and Republicans for each of the educational groups
+Alternately, it could be a bias of the ANES survey. If the survey transitions from in-person interviews to remote interview through Internet, this could hinder less educated population taking the survey. This bias is harder to account for. 
+
+A second trend apparent in this graph, is that across the years, Democrat voters fall mostly into two categories (`Grade school` and `High School`), while Republican voters more likely fall into the other two groups (`Some colleges` and `College or higher`). Contrary to our initial intuitions, 2016 is actually an anomaly. 
+
+This realization came to us as a total surprise. The stereotype we have from college, that Republican voters are less educated than Democrat voters, is incorrect. For a more quantitative measure, we look at this percentage difference between the Democrats and Republicans for each of the educational groups
 
 ```{r, echo=FALSE}
 
@@ -156,14 +167,15 @@ ggplot(dataBox, aes(x=eduID, y=spread))+
 
 ```
 
-This boxplot indicates two things:
+This boxplot reinforces the two observations we had above
 
-- People with high school degree or lower tend to vote for democrats more. On the other hands, Republicans have a stronger base in higher educational groups (college degree or higher). 
--  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This means that there was a shift in political preference among the higher educational groups in 2016, as more people with college degree vote for democrats than for republicans.  
+- People with high school degree or lower tend to vote for Democrats more. On the other hands, Republicans have a stronger base in higher educational groups (college degree or higher). 
+
+-  2016 is an outlier for the `college and higher` category, while 2012 is an outlier for the `some colleges` category. This indicates two possible shifts in political preference: either higher educated group switching to Democrat, or less educated group switching to Republican. To find out which one is the case, we need further correction to the population bias mentioned above (i.e. respondent political distribution mirrors true population). Moving forward, we present some argument of why the second case fit better with the big picture.  
 
 # Question 2: What make a person choose one party over the other?
 
-I tried to reason the political preference for each different educational background by looking at voter answers to the questions: what do voters like/don't like about the party? I analyzed their answers, and made word cloud plots based on the frequency that key words popped up. The plots gave some interesting insights on the each party's characteristics. 
+Next, we looked further at voter responses across different education background to the following questions: *what do you like/dislike about the party?* The responses were converted into word-clouds based on keyword frequency. These plots reveal some interesting insights.
 
 ```{r, echo=FALSE}
 data1<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
@@ -264,10 +276,9 @@ wordcloud(words=wc2$LikeID, freq = wc2$n, scale=c(2,.5), random.order = FALSE,ro
 
 ```
 
-Democratic party win voters favor with their Group Connection quality, and their Domestic Policies. Voters, on the other hand, resonance with Republican Party on their Domestic Policy, Philosophy, Management skills. 
+The Democrat party wins favor through their `Group Connection` and `Domestic Policies`. Republican voters, on the other hand, resonate with the Republican Party on their `Domestic Policy`, `Philosophy`, and `Management skills`. 
 
-We repeat the same process to answer the question: what does voters hate about each parties: 
-
+The same process is repeated with the following question: *What do you hate about each parties?* 
 
 ```{r, echo=FALSE}
 # ATTEMPT DISLIKE about DEMOCRATIC PARTY
@@ -387,13 +398,15 @@ wordcloud(words=cd$DislikeID, freq = cd$n, scale=c(2,.5), random.order = FALSE,r
 
 ```
 
-From what the word clouds show, it appears the top common reason that make voters hate one party is Domestic policies. The words "domestic policies", "philosophy" , "party character" showed up on both democratic and republican graph. This is easy to understand, as people have different opinions on how their countries should be run, as well as their philosophies. One interesting thing that we see is  people who disagree with the democratic party' management skill. This does not happen with  the republican party. Apparently, voters across the board think that the democratic party lack credential in their management ability. On the other hand, Group connection quality is among the top reasons why voters don't like republican party.
+The word-cloud above indicates a top common reason, `Domestic policies`, for both party undesirable trait. The words `domestic policies`, `philosophy` , `party character` showed up on both the Democrat and `republican graph. This is likely due to the characteristics of these traits, being less polar, but rather on wider spectra. 
 
-Connecting this to our previous finding, that higher educated voters prefer republicans, the word cloud plots make total sense. People who have lower income , correlated with less educated background. These people choose Democrats because the party offer a superior group connection quality, with a promise of equal pay, higher tax on the rich, and most importantly, inclusivity for the poor. The voters who have higher education, enjoyed a higher pay positions, want to maintain their social status, so they resonate more with the Republican's conservative philosophy. These voters place an emphasis on the party's management skill in preserving the rich's benefits. 
+Interestingly, we also observe people disliking the Democratic party' `management skill`, which does not happen for the Republican party. This potentially suggests a general feeling that the Democratic party lacks credential in their `management ability`. On the other hand, `group connection` quality is among the top reasons why voters don't like the Republican party.
+
+These word-cloud supports the trend seen in the previous section, that more educated voters prefer the  Republican party, and less educated voters prefer the Democratic Party. Education levels haven been shown to correlate with income []. The Democratic Party superior `group connection` quality, which entails equal pays, higher taxes on the rich, and most importantly, inclusivity of all income classes, thus will appear more attractive to less educated population. On the other hand, voters with higher education, enjoying higher pays and better benefits, will prefer to maintain their social status. This explain their resonance with the Republican conservatism philosophy. These voters likely place an emphasis on how well the Government run the country with their `management skill`, which directly influences the economy, rather than social justices. 
 
 # Question 3: Why Donald Trump win? Does his agenda make sense?
 
-I looked at the voter's feeling thermometer toward Democratic party across the years, and 2016 specifically: 
+Next, we looked at the voter `thermometer` toward the Democratic Party across the years versus specifically 2016 data. 
 
 ```{r,echo=FALSE}
 dataFull<-read.table("output/anes_trimmed.csv", header = TRUE, sep=",")
@@ -456,9 +469,9 @@ grid.arrange(p1, p2, ncol=2, top = textGrob(" Feelings toward Republican Party",
 
 ```
 
-It turns out, that, there was a decrease in favoritism against Democratic party across different educations groups, especially within the democratic strongest voting base: grade school and high school voters. On the other hand, people's feeling toward Republican party remains relatively unchanged. This means that somehow in 2016, Donald Trump succeed in attracting  voters from the democratic party into his supporting group. 
+There is a uniform decrease in feeling toward the Democratic Party across different educations groups. This change is most likely a time-biased, similar to the effect we saw in figure 1. However, interestingly people feeling toward Republican party remains relatively unchanged, especially for the less educated group. This suggests that in 2016, Donald Trump succeeded in attracting voters from this population from the Democrats.
 
-I then analyzed one of Trump's most prominent agenda: Blocking Immigration, and tried to explain the shift in voting base toward Republicans.
+What could be the reason? In this analysis, we offer a potential reason for this shift in voting base by analyzing one of Trump's most prominent agenda: immigration.
 
 
 ```{r, echo=FALSE}
@@ -515,9 +528,9 @@ ggplot(
 ```
 
 
-Most people who only have high school degrees think that the chances immigrants stealing their jobs are extremely likely. These people used to mainly support Democratic party. In ` Some College degrees` educational groups, where republicans lead democratic party, there is an uptrend in voters think negatively about immigrants job wise. 
+Most people who only have high school degrees deem the chance that immigrants will steal their jobs is *extremely likely*. As shown above, this group is a strong Democrat base. In ` Some College degrees` educational group, where the Republicans lead the Democrats, there is an uptrend in voters feeling negatively about immigrants because of job prospect. 
 
-This conclusion explained Trump's aggressive immigration agenda in 2016, where he publicly said that he would build a wall spanning the entirety of the U.S-Mexico border, ban all Muslims from entering the country, deport millions of undocumented immigrants who have lived in the interior of the United States for years, and increase the salary quota and restrictions on highly skilled worker VISA H1B. 
+This observation indicates potential connection to Trump's aggressive immigration agenda in 2016. His top agenda include building the wall, banning all Muslims, deporting undocumented immigrants who have lived in the United States for years, and increasing restrictions on highly skilled worker VISA H1-B. It is hard to verify that his agenda was actually crafted to extract this large base of voters from the Democrats, but it had a tremendous impact. 
 
 ## Trump's agenda sounds idiotic, ruthless yet extremely effective
 
@@ -525,18 +538,24 @@ Trump purposely used his immigration agenda to target and attract democratic vot
 
 # Biases 
 
-This section mentioned some biases that should be taken into consideration when looking at the outcomes of this report, as well as the survey conducted by ANES. First of all, people were paid to do the survey. Hence the data may be biased, and not represent the voter population correctly. Secondly, there are difference in sample sizes across years that the survey took place. There was less data recorded in 1990s, compared to, for example 2010-2016.Hence, reader should take analysis related to the volume of voters with a grain of salt. One way to minimize these biases is to utilize error bars. Another potential biases that we should take into account is the effect of the interview administrator. Readers should take in mind the influence of administrator's body language on respondent's answers. 
+This section summarizes some of the biases mentioned in the report, as well as some that should be taken into consideration in future works. 
 
-For all the potential biases above, in this project, I tried to minimize the biases, by taking the difference between Democrats voters and Republican voters, and average them across the years, instead of taking the absolute respondent volume. 
+A respondent bias comes from the fact that people were paid to do the survey. Similarly, the mean of taking survey may exclude certain groups from participating. 
+
+Furthermore, there are differences in sample sizes across the years that the surveys took place. There was less data recorded in the 1990s compared to the 2010-2016 period. These uncertainties can be incorporated into the visualizations above through error bars, for instance. 
+
+Interviewer bias may also take place. For example,at one-on-one interviews, respondents can be influenced by the administrators' body languages, expressions, or simply demographic or race. 
+
+The biases influencing the voter distribution between the two parties were taken into account. As explained above, we worked with the percentage distribution and percentage difference between each education group, rather than considering the raw numbers. Nonetheless, other surveys will prove to be valuable to examining the points raised in this report. 
 
 
 # Conclusion
 
-- People who vote for democratic party are mainly high school and grade school degree holders. On the other hand, Republican party a stronger presence in Higher degree holders (some colleges and higher education).
-- Voters commend on Democratics on their group connection quality, domestic policies, while Republicans gain favor through their management skills and also domestic policies.
-- Voters hate Democrats for their poor management skills, and Republicans for their lack of group connections. 
-- People who only have high school degree think that the chances immigrants stealing their jobs are very likely. People have college degrees or higher don't think so (not likely). Although, we observed some upward trend in the number of people with ` some college` degree thinking negatively about immgration levels impact on the job market. 
+People who vote for the Democratic party are mainly `high school` and `grade school` degree holders. On the other hand, the Republican party has a stronger presence in higher degree holders (`some colleges` and `higher education`).
 
+Voters are attracted to the Democratic Party on their `group connection quality` and `domestic policies`, while the Republicans gain favor through their `management skills` and also `domestic policies`. Voters hate  the Democrats for their poor `management skills`, and Republicans for their lack of `group connections`. 
+
+People who only have `high school degree` tend to think immigrants will likely steal their jobs. People having `college degrees` or higher tend to think less so. Although, we observed some upward trend in the number of people with `some college` degree thinking negatively about immigration impact on the job market, though the significance is open to further analysis. 
 
 
 
